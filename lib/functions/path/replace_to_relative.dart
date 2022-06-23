@@ -8,7 +8,7 @@ String replaceToRelativeImport(String import, String otherFile) {
   var endImport = import.lastIndexOf("'");
   var pathImport = import.substring(startImport + 1, endImport);
   var pathSafe = Structure.safeSplitPath(otherFile);
-  pathSafe.removeWhere((element) => element == 'lib');
+  pathSafe.removeRange(0, pathSafe.lastIndexOf('lib') + 1);
   pathSafe.removeLast();
   otherFile = pathSafe.join('/');
 

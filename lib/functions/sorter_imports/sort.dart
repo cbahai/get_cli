@@ -1,9 +1,10 @@
 import 'dart:convert';
 
 import '../../common/utils/pubspec/pubspec_utils.dart';
+import '../../core/structure.dart';
 import '../../extensions.dart';
 import '../create/create_single_file.dart';
-import '../formatter_dart_file/frommatter_dart_file.dart';
+// import '../formatter_dart_file/frommatter_dart_file.dart';
 import '../path/replace_to_relative.dart';
 
 /// Sort imports from a dart file
@@ -15,7 +16,12 @@ String sortImports(
   bool useRelative = false,
 }) {
   packageName = packageName ?? PubspecUtils.projectName;
-  content = formatterDartFile(content);
+  final filePathElements = Structure.safeSplitPath(filePath);
+  final lastIndexOfLib = filePathElements.lastIndexOf('lib');
+  if (lastIndexOfLib > 0) {
+    packageName = filePathElements[lastIndexOfLib - 1];
+  }
+  // content = formatterDartFile(content);
   var lines = LineSplitter.split(content).toList();
 
   var contentLines = <String>[];
@@ -30,36 +36,39 @@ String sortImports(
 
   var stringLine = false;
   for (var i = 0; i < lines.length; i++) {
-    if (lines[i].startsWith('import ') &&
+    final line = lines[i].trimRight();
+    if (line.startsWith('import ') &&
         !stringLine &&
-        lines[i].endsWith(';')) {
-      if (lines[i].contains('dart:')) {
-        dartImports.add(lines[i]);
-      } else if (lines[i].contains('package:flutter/')) {
-        flutterImports.add(lines[i]);
-      } else if (lines[i].contains('package:$packageName/')) {
-        projectImports.add(lines[i]);
-      } else if (!lines[i].contains('package:')) {
-        projectRelativeImports.add(lines[i]);
-      } else if (lines[i].contains('package:')) {
-        if (!lines[i].contains('package:flutter/')) {
-          packageImports.add(lines[i]);
+        line.endsWith(';')) {
+      if (line.contains('dart:')) {
+        dartImports.add(line);
+      } else if (line.contains('package:flutter/')) {
+        flutterImports.add(line);
+      } else if (line.contains('package:$packageName/')) {
+        projectImports.add(line);
+      } else if (!line.contains('package:')) {
+        projectRelativeImports.add(line);
+      } else if (line.contains('package:')) {
+        if (!line.contains('package:flutter/')) {
+          packageImports.add(line);
         }
       }
-    } else if (lines[i].startsWith('export ') &&
-        lines[i].endsWith(';') &&
+    } else if (line.startsWith('export ') &&
+        line.endsWith(';') &&
         !stringLine) {
-      exports.add(lines[i]);
-    } else if (lines[i].startsWith('library ') &&
-        lines[i].endsWith(';') &&
+      exports.add(line);
+    } else if (line.startsWith('library ') &&
+        line.endsWith(';') &&
         !stringLine) {
-      librarys.add(lines[i]);
+      librarys.add(line);
     } else {
-      var containsThreeQuotes = lines[i].contains("'''");
+      var containsThreeQuotes = line.contains("'''");
       if (containsThreeQuotes) {
         stringLine = !stringLine;
       }
-      contentLines.add(lines[i]);
+      if (contentLines.isNotEmpty || line.isNotEmpty) {
+        contentLines.add(line);
+      }
     }
   }
 
@@ -94,25 +103,30 @@ String sortImports(
 
   var sortedLines = <String>[];
 
+  if (contentLines.isNotEmpty) {
+    contentLines.add('');
+  }
+
   sortedLines.addAll([
     ...librarys,
-    '',
+    if (librarys.isNotEmpty) '',
     ...dartImports,
-    '',
+    if (dartImports.isNotEmpty) '',
     ...flutterImports,
-    '',
+    if (flutterImports.isNotEmpty) '',
     ...packageImports,
-    '',
+    if (packageImports.isNotEmpty) '',
     ...projectImports,
-    '',
+    if (projectImports.isNotEmpty) '',
     ...projectRelativeImports,
-    '',
+    if (projectRelativeImports.isNotEmpty) '',
     ...exports,
-    '',
+    if (exports.isNotEmpty) '',
     ...contentLines
   ]);
 
-  return formatterDartFile(sortedLines.join('\n'));
+  // return formatterDartFile(sortedLines.join('\n'));
+  return sortedLines.join('\n');
 }
 
 String _replacePath(String str) {

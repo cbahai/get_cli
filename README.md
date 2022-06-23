@@ -1,3 +1,19 @@
+dart pub global list  
+dart pub global deactivate get_cli  
+dart pub global activate --source path get_cli
+
+https://marketplace.visualstudio.com/items?itemName=emeraldwalk.RunOnSave
+```json
+"emeraldwalk.runonsave": {
+    "commands": [
+        {
+            "match": "\\.dart$",
+            "cmd": "get sort --relative ${relativeFile}"
+        }
+    ]
+}
+```
+
 ###### Documentation languages
 
 | [pt_BR](README-pt_BR.md) | en_US - this file |[zh_CN](README-zh_CN.md) |
