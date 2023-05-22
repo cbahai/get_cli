@@ -1,6 +1,7 @@
 import 'dart:io';
 
-import 'package:cli_dialog/cli_dialog.dart';
+
+import 'package:dcli/dcli.dart';
 import 'package:recase/recase.dart';
 
 import '../../../../common/menu/menu.dart';
@@ -40,13 +41,10 @@ class CreatePageCommand extends Command {
   @override
   String? get hint => LocaleKeys.hint_create_page.tr;
 
-  @override
-  bool validate() => super.validate();
-
   void checkForAlreadyExists(String? name) {
-    var _fileModel =
+    var newFileModel =
         Structure.model(name, 'page', true, on: onCommand, folderName: name);
-    var pathSplit = Structure.safeSplitPath(_fileModel.path!);
+    var pathSplit = Structure.safeSplitPath(newFileModel.path!);
 
     pathSplit.removeLast();
     var path = pathSplit.join('/');
@@ -65,11 +63,11 @@ class CreatePageCommand extends Command {
       if (result.index == 0) {
         _writeFiles(path, name!, overwrite: true);
       } else if (result.index == 2) {
-        final dialog = CLI_Dialog();
-        dialog.addQuestion(LocaleKeys.ask_new_page_name.tr, 'name');
-        name = dialog.ask()['name'] as String?;
-
-        checkForAlreadyExists(name!.trim().snakeCase);
+        // final dialog = CLI_Dialog();
+        // dialog.addQuestion(LocaleKeys.ask_new_page_name.tr, 'name');
+        // name = dialog.ask()['name'] as String?;
+        var name = ask(LocaleKeys.ask_new_page_name.tr);
+        checkForAlreadyExists(name.trim().snakeCase);
       }
     } else {
       Directory(path).createSync(recursive: true);

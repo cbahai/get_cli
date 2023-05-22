@@ -8,7 +8,7 @@ GetX™ 框架的官方 CLI。
 ```dart
 // 安装:
 pub global activate get_cli 
-// 使用本命令需要设置系统环境变量: [FlutterSDK安装目录]\bin\cache\dart-sdk\bin
+// 使用本命令需要设置系统环境变量: [FlutterSDK安装目录]\bin\cache\dart-sdk\bin 和 [FlutterSDK安装目录]\.pub-cache\bin
 
 flutter pub global activate get_cli
 
@@ -193,7 +193,7 @@ class AuthController extends GetxController {
 
 在指定目录创建 view
 
-### 生成国家化文件
+### 生成国际化文件
 
 在 assets/locales 目录创建 json 格式的语言文件
 

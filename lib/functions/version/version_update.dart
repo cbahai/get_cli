@@ -20,7 +20,7 @@ void checkForUpdate() async {
             .then((versionInstalled) async {
           if (versionInstalled == null) exit(2);
 
-          final v1 = Version.parse(versionInPubDev);
+          final v1 = Version.parse(versionInPubDev!);
           final v2 = Version.parse(versionInstalled);
           final needsUpdate = v1.compareTo(v2);
           // needs update.
@@ -30,7 +30,7 @@ void checkForUpdate() async {
                 .toString());
             //await versionCommand();
             printGetCli();
-            final String? codeSample = LogService.code('get update');
+            final String codeSample = LogService.code('get update');
             LogService.info(
                 '${LocaleKeys.info_update_available2.trArgs([
                       versionInPubDev

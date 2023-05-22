@@ -1,6 +1,7 @@
 import 'dart:io';
 
-import 'package:cli_dialog/cli_dialog.dart';
+
+import 'package:dcli/dcli.dart';
 import 'package:http/http.dart';
 import 'package:path/path.dart' as p;
 import 'package:recase/recase.dart';
@@ -23,22 +24,23 @@ class GenerateModelCommand extends Command {
   Future<void> execute() async {
     var name = p.basenameWithoutExtension(withArgument).pascalCase;
     if (withArgument.isEmpty) {
-      final dialog = CLI_Dialog(questions: [
-        [LocaleKeys.ask_model_name.tr, 'name']
-      ]);
-      var result = dialog.ask()['name'] as String;
+      // final dialog = CLI_Dialog(questions: [
+      //   [LocaleKeys.ask_model_name.tr, 'name']
+      // ]);
+      // var result = dialog.ask()['name'] as String;
+      var result = ask(LocaleKeys.ask_model_name.tr);
       name = result.pascalCase;
     }
 
-    FileModel _fileModel;
+    FileModel newFileModel;
     final classGenerator = ModelGenerator(
         name, containsArg('--private'), containsArg('--withCopy'));
 
-    _fileModel = Structure.model(name, 'model', false, on: onCommand);
+    newFileModel = Structure.model(name, 'model', false, on: onCommand);
 
     var dartCode = classGenerator.generateDartClasses(await _jsonRawData);
 
-    var modelPath = '${_fileModel.path}_model.dart';
+    var modelPath = '${newFileModel.path}_model.dart';
 
     var model = writeFile(modelPath, dartCode.result, overwrite: true);
 

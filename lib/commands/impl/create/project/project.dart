@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:cli_dialog/cli_dialog.dart';
+import 'package:dcli/dcli.dart';
 import 'package:path/path.dart' as p;
 import 'package:recase/recase.dart';
 
@@ -23,32 +23,35 @@ class CreateProjectCommand extends Command {
     final menu = Menu([
       'Flutter Project',
       'Get Server',
-    ]);
+    ],title: 'Select which type of project you want to create ?');
     final result = menu.choose();
     String? nameProject = name;
     if (name == '.') {
-      final dialog = CLI_Dialog(questions: [
-        [LocaleKeys.ask_name_to_project.tr, 'name']
-      ]);
-      nameProject = dialog.ask()['name'] as String?;
+      // final dialog = CLI_Dialog(questions: [
+      //   [LocaleKeys.ask_name_to_project.tr, 'name']
+      // ]);
+      nameProject = ask(LocaleKeys.ask_name_to_project.tr);
     }
 
     var path = Structure.replaceAsExpected(
-        path: Directory.current.path + p.separator + nameProject!.snakeCase);
+        path: Directory.current.path + p.separator + nameProject.snakeCase);
     await Directory(path).create(recursive: true);
 
     Directory.current = path;
 
     if (result.index == 0) {
-      final dialog = CLI_Dialog(questions: [
-        [
-          '${LocaleKeys.ask_company_domain.tr} \x1B[33m '
-              '${LocaleKeys.example.tr} com.yourcompany \x1B[0m',
-          'org'
-        ]
-      ]);
+      // final dialog = CLI_Dialog(questions: [
+      //   [
+      //     '${LocaleKeys.ask_company_domain.tr} \x1B[33m '
+      //         '${LocaleKeys.example.tr} com.yourcompany \x1B[0m',
+      //     'org'
+      //   ]
+      // ]);
 
-      var org = dialog.ask()['org'] as String?;
+      var org = ask(
+        '${LocaleKeys.ask_company_domain.tr} \x1B[33m '
+        '${LocaleKeys.example.tr} com.yourcompany \x1B[0m',
+      );
 
       final iosLangMenu =
           Menu(['Swift', 'Objective-C'], title: LocaleKeys.ask_ios_lang.tr);
@@ -70,10 +73,8 @@ class CreateProjectCommand extends Command {
       var useNullSafe = nullSafeMenuResult.index == 0;
 
       final linterMenu = Menu([
+        'yes',
         'no',
-        'Pedantic [Deprecated]',
-        'Effective Dart [Deprecated]',
-        'Dart Recommended',
       ], title: LocaleKeys.ask_use_linter.tr);
       final linterResult = linterMenu.choose();
 
@@ -85,26 +86,22 @@ class CreateProjectCommand extends Command {
         await ShellUtils.activatedNullSafe();
       }
       switch (linterResult.index) {
-        case 1:
-          PubspecUtils.addDependencies('pedantic',
-              isDev: true, runPubGet: false);
-          AnalysisOptionsSample(
-                  include: 'include: package:pedantic/analysis_options.yaml')
-              .create();
+        case 0:
+          if (PubspecUtils.isServerProject) {
+            await PubspecUtils.addDependencies('lints',
+                isDev: true, runPubGet: true);
+            AnalysisOptionsSample(
+                    include: 'include: package:lints/recommended.yaml')
+                .create();
+          } else {
+            await PubspecUtils.addDependencies('flutter_lints',
+                isDev: true, runPubGet: true);
+            AnalysisOptionsSample(
+                    include: 'include: package:flutter_lints/flutter.yaml')
+                .create();
+          }
           break;
-        case 2:
-          PubspecUtils.addDependencies('effective_dart',
-              isDev: true, runPubGet: false);
-          AnalysisOptionsSample(
-              include: 'include: package:effective_dart/analysis_options.yaml');
-          break;
-        case 3:
-          await PubspecUtils.addDependencies('lints',
-              isDev: true, runPubGet: true);
-          AnalysisOptionsSample(
-                  include: 'include: package:lints/recommended.yaml')
-              .create();
-          break;
+
         default:
           AnalysisOptionsSample().create();
       }

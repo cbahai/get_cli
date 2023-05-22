@@ -25,14 +25,15 @@ import 'package:get/get.dart';
 $import
 
 class $_viewName extends $_controllerName {
+ const $_viewName({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('$_viewName'),
+        title: const Text('$_viewName'),
         centerTitle: true,
       ),
-      body: Center(
+      body:const Center(
         child: Text(
           '$_viewName is working', 
           style: TextStyle(fontSize:20),
@@ -49,7 +50,7 @@ class $_viewName extends $_controllerName {
 class $_viewName extends $_controllerName {
   @override
   Widget build(BuildContext context) {
-    return Text('GetX to Server is working!');
+    return const Text('GetX to Server is working!');
   }
 }
   ''';
